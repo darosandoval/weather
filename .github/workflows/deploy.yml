@@ -3,7 +3,7 @@ name: Inject Secret and Deploy
 on:
   push:
     branches:
-      - main  # Verifica si tu rama se llama main o master y ajústalo
+      - main  # Asegúrate de que este sea el nombre de tu rama
 
 permissions:
   contents: write
@@ -13,6 +13,11 @@ permissions:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    # Esta es la parte que faltaba y que causa el error en la imagen
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
