@@ -1,0 +1,31 @@
+name: Inject Secret and Deploy
+
+on:
+  push:
+    branches:
+      - main  # Verifica si tu rama se llama main o master y ajústalo
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Replace API Key
+        run: |
+          sed -i "s/VALUE_TO_REPLACE/${{ secrets.OPENWEATHER_API_KEY }}/g" index.html
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
