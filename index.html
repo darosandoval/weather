@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <title>Clock &amp; Weather</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #050810;
+      min-height: 100vh;
+      display: -webkit-flex;
+      display: flex;
+      -webkit-align-items: center;
+      align-items: center;
+      -webkit-justify-content: center;
+      justify-content: center;
+      padding: 16px;
+      font-family: 'Share Tech Mono', 'Courier New', monospace;
+    }
+
+    .lcd-outer {
+      background: #0a0a0e;
+      border-radius: 20px;
+      padding: 24px 20px 20px;
+      width: 100%;
+      max-width: 480px;
+      border: 3px solid #141418;
+    }
+
+    .lcd-screen {
+      background: #03080f;
+      border-radius: 12px;
+      padding: 22px 18px 18px;
+      border: 2px solid #0a1828;
+    }
+
+    .lcd-day {
+      font-size: 46px;
+      color: #4a90d9;
+      letter-spacing: 8px;
+      text-align: center;
+      line-height: 1;
+      margin-bottom: 10px;
+      text-shadow: 0 0 10px #1a5090, 0 0 2px #4a90d9;
+    }
+
+    .lcd-time-row {
+      display: -webkit-flex;
+      display: flex;
+      -webkit-align-items: center;
+      align-items: center;
+      -webkit-justify-content: center;
+      justify-content: center;
+      margin-bottom: 8px;
+      position: relative;
+    }
+
+    .lcd-time {
+      font-size: 78px;
+      color: #4a90d9;
+      letter-spacing: 4px;
+      line-height: 1;
+      text-shadow: 0 0 12px #1a5090, 0 0 2px #4a90d9;
+    }
+
+    .lcd-colon {
+      animation: blink 1s step-end infinite;
+    }
+
+    @-webkit-keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.15; }
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.15; }
+    }
+
+    .lcd-ampm {
+      font-size: 16px;
+      color: #4a90d9;
+      -webkit-align-self: flex-end;
+      align-self: flex-end;
+      margin-bottom: 12px;
+      margin-left: 8px;
+      letter-spacing: 2px;
+      text-shadow: 0 0 6px #1a5090;
+    }
+
+    .lcd-weather-corner {
+      position: absolute;
+      right: 0;
+      top: 0;
+      text-align: right;
+    }
+
+    .lcd-temp-big {
+      font-size: 30px;
+      color: #4a90d9;
+      letter-spacing: 2px;
+      text-shadow: 0 0 8px #1a5090;
+      line-height: 1;
+    }
+
+    .lcd-wx-icon {
+      font-size: 22px;
+      text-align: right;
+      margin-top: 3px;
+    }
+
+    .lcd-divider {
+      height: 1px;
+      background: #0a1828;
+      margin: 6px 0 12px;
+    }
+
+    .lcd-bottom {
+      display: -webkit-flex;
+      display: flex;
+      -webkit-justify-content: space-between;
+      justify-content: space-between;
+      -webkit-align-items: center;
+      align-items: center;
+    }
+
+    .lcd-date {
+      font-size: 34px;
+      color: #4a90d9;
+      letter-spacing: 5px;
+      text-shadow: 0 0 8px #1a5090, 0 0 2px #4a90d9;
+    }
+
+    .lcd-year {
+      font-size: 34px;
+      color: #4a90d9;
+      letter-spacing: 5px;
+      text-shadow: 0 0 8px #1a5090, 0 0 2px #4a90d9;
+    }
+
+    .lcd-details {
+      margin-top: 14px;
+      display: -webkit-flex;
+      display: flex;
+      gap: 0;
+      -webkit-justify-content: space-between;
+      justify-content: space-between;
+    }
+
+    .lcd-pill {
+      font-size: 12px;
+      color: #1e4060;
+      letter-spacing: 1px;
+      text-shadow: 0 0 3px #0a2030;
+    }
+
+    .lcd-pill span {
+      color: #4a90d9;
+      text-shadow: 0 0 6px #1a5090;
+    }
+
+    .lcd-cond {
+      font-size: 12px;
+      color: #1e4060;
+      text-align: center;
+      letter-spacing: 3px;
+      margin-top: 8px;
+      text-shadow: 0 0 3px #0a2030;
+    }
+
+    .lcd-city {
+      font-size: 11px;
+      color: #132a40;
+      text-align: center;
+      letter-spacing: 2px;
+      margin-top: 4px;
+    }
+
+    .lcd-forecast {
+      display: -webkit-flex;
+      display: flex;
+      gap: 6px;
+      margin-top: 14px;
+    }
+
+    .lcd-fc-day {
+      -webkit-flex: 1;
+      flex: 1;
+      border: 1px solid #0a1828;
+      border-radius: 6px;
+      padding: 6px 4px;
+      text-align: center;
+    }
+
+    .lcd-fc-name {
+      font-size: 11px;
+      color: #1e4060;
+      letter-spacing: 1px;
+      margin-bottom: 3px;
+    }
+
+    .lcd-fc-icon {
+      font-size: 16px;
+      margin-bottom: 3px;
+    }
+
+    .lcd-fc-hi {
+      font-size: 13px;
+      color: #4a90d9;
+      text-shadow: 0 0 5px #1a5090;
+      letter-spacing: 1px;
+    }
+
+    .lcd-fc-lo {
+      font-size: 11px;
+      color: #1e4060;
+      letter-spacing: 1px;
+    }
+
+    .lcd-search {
+      margin-top: 16px;
+      display: -webkit-flex;
+      display: flex;
+      gap: 8px;
+    }
+
+    .lcd-search input {
+      -webkit-flex: 1;
+      flex: 1;
+      background: #03080f;
+      border: 1px solid #0d2540;
+      border-radius: 6px;
+      padding: 9px 12px;
+      font-size: 14px;
+      font-family: 'Share Tech Mono', 'Courier New', monospace;
+      color: #4a90d9;
+      outline: none;
+      letter-spacing: 1px;
+      -webkit-appearance: none;
+    }
+
+    .lcd-search input::-webkit-input-placeholder { color: #132a40; }
+
+    .lcd-search button {
+      background: #071525;
+      border: 1px solid #0d2540;
+      border-radius: 6px;
+      color: #4a90d9;
+      font-size: 13px;
+      font-family: 'Share Tech Mono', 'Courier New', monospace;
+      padding: 9px 16px;
+      cursor: pointer;
+      letter-spacing: 2px;
+      -webkit-appearance: none;
+    }
+
+    .lcd-search button:active { background: #0d2540; }
+
+    .lcd-err {
+      font-size: 12px;
+      color: #c0392b;
+      margin-top: 6px;
+      letter-spacing: 2px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="lcd-outer">
+    <div class="lcd-screen">
+
+      <div class="lcd-day" id="lcd-day">TUESDAY</div>
+
+      <div class="lcd-time-row">
+        <div class="lcd-time">
+          <span id="lcd-hh">12</span><span class="lcd-colon">:</span><span id="lcd-mm">30</span>
+        </div>
+        <div class="lcd-ampm" id="lcd-ampm">PM</div>
+        <div class="lcd-weather-corner" id="lcd-wcorner" style="display:none;">
+          <div class="lcd-temp-big" id="lcd-temp">--&deg;C</div>
+          <div class="lcd-wx-icon" id="lcd-wxicon"></div>
+        </div>
+      </div>
+
+      <div class="lcd-divider"></div>
+
+      <div class="lcd-bottom">
+        <div class="lcd-date" id="lcd-date">JAN 01</div>
+        <div class="lcd-year" id="lcd-year">2026</div>
+      </div>
+
+      <div class="lcd-details" id="lcd-dets" style="display:none;">
+        <div class="lcd-pill">HUM <span id="lcd-hum">--</span></div>
+        <div class="lcd-pill">WIND <span id="lcd-wind">--</span></div>
+        <div class="lcd-pill">FEELS <span id="lcd-feels">--</span></div>
+      </div>
+
+      <div class="lcd-cond" id="lcd-cond"></div>
+      <div class="lcd-city" id="lcd-city"></div>
+
+      <div class="lcd-forecast" id="lcd-forecast"></div>
+
+      <div class="lcd-search">
+        <input type="text" id="lcd-input" placeholder="CHANGE CITY..." value="Buenos Aires" />
+        <button id="lcd-btn">LOAD</button>
+      </div>
+      <div class="lcd-err" id="lcd-err"></div>
+
+    </div>
+  </div>
+
+  <script>
+    var API_KEY = 'c94e6151ff3926d44d5404eee57650d2';
+
+    var DAYS   = ['SUNDAY','MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];
+    var MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+    var SDAYS  = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+
+    function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+    function wIcon(c) {
+      if (c <= 232) return '\u26A1';
+      if (c <= 321) return '\uD83C\uDF27';
+      if (c <= 531) return '\uD83C\uDF26';
+      if (c <= 622) return '\u2744\uFE0F';
+      if (c <= 781) return '\uD83C\uDF2A';
+      if (c === 800) return '\u2600\uFE0F';
+      if (c <= 802) return '\u26C5';
+      return '\u2601\uFE0F';
+    }
+
+    function dayOf(ts) { return SDAYS[new Date(ts * 1000).getDay()]; }
+
+    function tick() {
+      var now = new Date();
+      var h = now.getHours(), m = now.getMinutes();
+      var h12 = h % 12 || 12;
+      document.getElementById('lcd-hh').textContent   = pad(h12);
+      document.getElementById('lcd-mm').textContent   = pad(m);
+      document.getElementById('lcd-ampm').textContent = h < 12 ? 'AM' : 'PM';
+      document.getElementById('lcd-day').textContent  = DAYS[now.getDay()];
+      document.getElementById('lcd-date').textContent = MONTHS[now.getMonth()] + ' ' + pad(now.getDate());
+      document.getElementById('lcd-year').textContent = now.getFullYear();
+    }
+
+    tick();
+    setInterval(tick, 1000);
+
+    function loadWeather(city) {
+      document.getElementById('lcd-err').textContent = '';
+      var url = 'https://api.openweathermap.org/data/2.5/forecast'
+        + '?q=' + encodeURIComponent(city)
+        + '&units=metric&cnt=24&appid=' + API_KEY;
+
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', url, true);
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState !== 4) return;
+        if (xhr.status !== 200) {
+          document.getElementById('lcd-err').textContent = 'CITY NOT FOUND';
+          return;
+        }
+        try {
+          var d   = JSON.parse(xhr.responseText);
+          var cur = d.list[0];
+
+          document.getElementById('lcd-temp').textContent   = Math.round(cur.main.temp) + '\u00b0C';
+          document.getElementById('lcd-wxicon').textContent = wIcon(cur.weather[0].id);
+          document.getElementById('lcd-feels').textContent  = Math.round(cur.main.feels_like) + '\u00b0C';
+          document.getElementById('lcd-hum').textContent    = cur.main.humidity + '%';
+          document.getElementById('lcd-wind').textContent   = Math.round(cur.wind.speed * 3.6) + 'KM/H';
+          document.getElementById('lcd-cond').textContent   = cur.weather[0].description.toUpperCase();
+          document.getElementById('lcd-city').textContent   = d.city.name.toUpperCase() + ', ' + d.city.country;
+
+          var dm = {};
+          for (var i = 0; i < d.list.length; i++) {
+            var it = d.list[i];
+            var dn = dayOf(it.dt);
+            if (!dm[dn]) dm[dn] = { hi: -999, lo: 999, icon: wIcon(it.weather[0].id) };
+            if (it.main.temp_max > dm[dn].hi) dm[dn].hi = it.main.temp_max;
+            if (it.main.temp_min < dm[dn].lo) dm[dn].lo = it.main.temp_min;
+          }
+
+          var keys = Object.keys(dm).slice(0, 4);
+          var fc   = '';
+          for (var j = 0; j < keys.length; j++) {
+            var k = keys[j];
+            fc += '<div class="lcd-fc-day">'
+              + '<div class="lcd-fc-name">' + k + '</div>'
+              + '<div class="lcd-fc-icon">' + dm[k].icon + '</div>'
+              + '<div class="lcd-fc-hi">'  + Math.round(dm[k].hi) + '\u00b0</div>'
+              + '<div class="lcd-fc-lo">'  + Math.round(dm[k].lo) + '\u00b0</div>'
+              + '</div>';
+          }
+          document.getElementById('lcd-forecast').innerHTML = fc;
+
+          document.getElementById('lcd-wcorner').style.display = 'block';
+          document.getElementById('lcd-dets').style.display    = '-webkit-flex';
+          document.getElementById('lcd-dets').style.display    = 'flex';
+
+        } catch (e) {
+          document.getElementById('lcd-err').textContent = 'ERROR READING DATA';
+        }
+      };
+      xhr.send();
+    }
+
+    document.getElementById('lcd-btn').addEventListener('click', function () {
+      var city = document.getElementById('lcd-input').value.trim();
+      if (city) loadWeather(city);
+    });
+
+    document.getElementById('lcd-input').addEventListener('keydown', function (e) {
+      if (e.keyCode === 13) document.getElementById('lcd-btn').click();
+    });
+
+    loadWeather('Buenos Aires');
+  </script>
+
+</body>
+</html>
